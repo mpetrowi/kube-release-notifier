@@ -69,8 +69,8 @@ func (c *DeploymentMonitoringController) deploymentUpdate(old, new interface{}) 
     }
 }
 
-// NewServiceLoggingController creates a ServiceLoggingController
-func NewDeploymentLoggingController(informerFactory informers.SharedInformerFactory, clientset kubernetes.Clientset) (*DeploymentMonitoringController, error) {
+// NewServiceMonitoringController creates a ServiceMonitoringController
+func NewDeploymentMonitoringController(informerFactory informers.SharedInformerFactory, clientset kubernetes.Clientset) (*DeploymentMonitoringController, error) {
     deploymentInformer := informerFactory.Apps().V1().Deployments()
 
     c := &DeploymentMonitoringController{

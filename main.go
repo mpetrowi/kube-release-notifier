@@ -43,7 +43,7 @@ func main() {
         labelOptions,
     )
 
-    controller, err := NewDeploymentLoggingController(factory, *clientset)
+    controller, err := NewDeploymentMonitoringController(factory, *clientset)
     if err != nil {
         log.Fatal(err)
     }
