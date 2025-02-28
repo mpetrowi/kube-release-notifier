@@ -46,12 +46,21 @@ func (c *DeploymentMonitoringController) updateDeployment(deploy *appsv1.Deploym
             panic(fmt.Errorf("Update deployment failed: %v", retryErr))
         }
         name := deploy.Labels["app.kubernetes.io/name"]
+        environment := deploy.Labels["aj-app-monitoring/environment"]
+        if environment == "" {
+            environment = deploy.Namespace
+        }
         fmt.Printf("APP UPDATED: %s/%s, Image: %s -> %s\n", deploy.Namespace, name, savedTag, tag)
+        containerLabel(image)
+        notifySlack(name, deploy.Namespace, environment, tag)
+        notifyForm(name, deploy.Namespace, environment, tag, "Deployment updated")
     }
 }
 
 func (c *DeploymentMonitoringController) deploymentAdd(obj interface{}) {
     deploy := obj.(*appsv1.Deployment)
+    name := deploy.Labels["app.kubernetes.io/name"]
+    fmt.Printf("MONITORING: %s/%s\n", deploy.Namespace, name)
     c.updateDeployment(deploy)
 }
 
