@@ -45,7 +45,7 @@ func (c *DeploymentMonitoringController) updateDeployment(deploy *appsv1.Deploym
         if retryErr != nil {
             panic(fmt.Errorf("Update deployment failed: %v", retryErr))
         }
-        name := deploy.Labels["aj-app-monitoring/appName"]
+        name := deploy.Labels["aj-app-monitoring/name"]
         if name == "" {
             name := deploy.Labels["app.kubernetes.io/name"]
         }
