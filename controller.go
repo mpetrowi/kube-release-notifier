@@ -47,7 +47,7 @@ func (c *DeploymentMonitoringController) updateDeployment(deploy *appsv1.Deploym
         }
         name := deploy.Labels["aj-app-monitoring/name"]
         if name == "" {
-            name := deploy.Labels["app.kubernetes.io/name"]
+            name = deploy.Labels["app.kubernetes.io/name"]
         }
         slackmoji := deploy.Labels["aj-app-monitoring/slackmoji"]
         if slackmoji == "" {
