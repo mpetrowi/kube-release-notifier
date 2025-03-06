@@ -23,7 +23,7 @@ type DeploymentMonitoringController struct {
 func (c *DeploymentMonitoringController) updateDeployment(deploy *appsv1.Deployment) {
     image := deploy.Spec.Template.Spec.Containers[0].Image
     tag := image[strings.LastIndex(image, ":")+1:]
-    savedTag := deploy.Annotations["aj-app-monitoring/tag"]
+    savedTag := deploy.Annotations["atomicjolt.com/release-monitor-tag"]
     if (tag != savedTag) {
         deploymentsClient := c.clientset.AppsV1().Deployments(deploy.ObjectMeta.Namespace)
         retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
