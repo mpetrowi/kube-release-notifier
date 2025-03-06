@@ -7,8 +7,8 @@ import (
 	"github.com/slack-go/slack"
 )
 
-func notifySlack(name string, namespace string, environment string, tag string) {
-	message := fmt.Sprintf(":%s: Deployed %s %s %s", name, environment, name, tag)
+func notifySlack(name string, namespace string, environment string, tag string, slackmoji string) {
+	message := fmt.Sprintf(":%s: Deployed %s %s %s", slackmoji, environment, name, tag)
 	api := slack.New(os.Getenv("SLACK_TOKEN"))
 	channelID, timestamp, err := api.PostMessage(
 		os.Getenv("SLACK_CHANNEL"),

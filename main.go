@@ -6,6 +6,7 @@ import (
     "os"
     "path/filepath"
     "time"
+    "fmt"
 
     "k8s.io/client-go/informers"
     "k8s.io/client-go/kubernetes"
@@ -35,7 +36,7 @@ func main() {
         log.Fatal(err)
     }
     labelOptions := informers.WithTweakListOptions(func(options *metav1.ListOptions) {
-        options.LabelSelector = "aj-app-monitoring=enabled"
+        options.LabelSelector = "aj-app-monitoring/enabled=true"
     })
     factory := informers.NewSharedInformerFactoryWithOptions(
         clientset,
@@ -54,5 +55,6 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
+    fmt.Printf("STARTING MONITORING\n")
     select {}
 }
