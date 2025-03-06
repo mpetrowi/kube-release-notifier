@@ -37,7 +37,7 @@ func (c *DeploymentMonitoringController) updateDeployment(deploy *appsv1.Deploym
             if ann == nil {
                 ann = make(map[string]string)
             }
-            ann["aj-app-monitoring/tag"] = tag
+            ann["atomicjolt.com/release-monitor-tag"] = tag
             result.Annotations = ann
             _, updateErr := deploymentsClient.Update(context.TODO(), result, metav1.UpdateOptions{})
             return updateErr
@@ -45,15 +45,15 @@ func (c *DeploymentMonitoringController) updateDeployment(deploy *appsv1.Deploym
         if retryErr != nil {
             panic(fmt.Errorf("Update deployment failed: %v", retryErr))
         }
-        name := deploy.Annotations["aj-app-monitoring/name"]
+        name := deploy.Annotations["atomicjolt.com/release-notifier-name"]
         if name == "" {
             name = deploy.Labels["app.kubernetes.io/name"]
         }
-        slackmoji := deploy.Annotations["aj-app-monitoring/slackmoji"]
+        slackmoji := deploy.Annotations["atomicjolt.com/release-notifier-slackmoji"]
         if slackmoji == "" {
             slackmoji = name
         }
-        environment := deploy.Annotations["aj-app-monitoring/environment"]
+        environment := deploy.Annotations["atomicjolt.com/release-notifier-environment"]
         if environment == "" {
             environment = deploy.Namespace
         }

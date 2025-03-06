@@ -36,7 +36,7 @@ func main() {
         log.Fatal(err)
     }
     labelOptions := informers.WithTweakListOptions(func(options *metav1.ListOptions) {
-        options.LabelSelector = "aj-app-monitoring=enabled"
+        options.LabelSelector = "atomicjolt.com/release-notifier=enabled"
     })
     factory := informers.NewSharedInformerFactoryWithOptions(
         clientset,
