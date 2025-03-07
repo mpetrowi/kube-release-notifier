@@ -49,12 +49,13 @@ func main() {
         log.Fatal(err)
     }
 
+    fmt.Printf("STARTING MONITORING\n")
+
     stop := make(chan struct{})
     defer close(stop)
     err = controller.Run(stop)
     if err != nil {
         log.Fatal(err)
     }
-    fmt.Printf("STARTING MONITORING\n")
     select {}
 }

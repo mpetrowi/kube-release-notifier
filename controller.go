@@ -23,7 +23,7 @@ type DeploymentMonitoringController struct {
 func (c *DeploymentMonitoringController) updateDeployment(deploy *appsv1.Deployment) {
     image := deploy.Spec.Template.Spec.Containers[0].Image
     tag := image[strings.LastIndex(image, ":")+1:]
-    savedTag := deploy.Annotations["atomicjolt.com/release-monitor-tag"]
+    savedTag := deploy.Annotations["atomicjolt.com/release-notifier-saved-tag"]
     if (tag != savedTag) {
         deploymentsClient := c.clientset.AppsV1().Deployments(deploy.ObjectMeta.Namespace)
         retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -37,7 +37,7 @@ func (c *DeploymentMonitoringController) updateDeployment(deploy *appsv1.Deploym
             if ann == nil {
                 ann = make(map[string]string)
             }
-            ann["atomicjolt.com/release-monitor-tag"] = tag
+            ann["atomicjolt.com/release-notifier-saved-tag"] = tag
             result.Annotations = ann
             _, updateErr := deploymentsClient.Update(context.TODO(), result, metav1.UpdateOptions{})
             return updateErr
@@ -58,16 +58,16 @@ func (c *DeploymentMonitoringController) updateDeployment(deploy *appsv1.Deploym
             environment = deploy.Namespace
         }
         fmt.Printf("APP UPDATED: %s/%s, Image: %s -> %s\n", deploy.Namespace, name, savedTag, tag)
-        containerLabel(image)
-        notifySlack(name, deploy.Namespace, environment, tag, slackmoji)
-        notifyForm(name, deploy.Namespace, environment, tag, "Deployment updated")
+        message := containerLabel(image)
+        fmt.Printf("Tag Message: %s\n", message)
+        notifySlack(name, deploy.Namespace, environment, tag, savedTag, slackmoji, message)
+        //notifyForm(name, deploy.Namespace, environment, tag, message)
     }
 }
 
 func (c *DeploymentMonitoringController) deploymentAdd(obj interface{}) {
     deploy := obj.(*appsv1.Deployment)
-    name := deploy.Labels["app.kubernetes.io/name"]
-    fmt.Printf("MONITORING: %s/%s\n", deploy.Namespace, name)
+    fmt.Printf("MONITORING %s/%s\n", deploy.Namespace, deploy.Name)
     c.updateDeployment(deploy)
 }
 
