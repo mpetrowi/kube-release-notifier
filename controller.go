@@ -61,7 +61,7 @@ func (c *DeploymentMonitoringController) updateDeployment(deploy *appsv1.Deploym
         fmt.Printf("APP UPDATED: %s/%s, Image: %s -> %s\n", deploy.Namespace, name, savedTag, tag)
         message := containerLabel(image)
         fmt.Printf("Tag Message: %s\n", message)
-        //notifySlack(name, deploy.Namespace, environment, tag, savedTag, slackmoji, message)
+        notifySlack(name, deploy.Namespace, environment, tag, savedTag, slackmoji, message)
         notifySheet(name, deploy.Namespace, environment, tag, message)
         //notifyForm(name, deploy.Namespace, environment, tag, message)
     }
