@@ -25,21 +25,21 @@ func containerLabel(repoImage string) string {
     // Parse the image reference
     ref, err := name.ParseReference(imageRef)
     if err != nil {
-        log.Printf("Error parsing image reference: %v", err)
+        log.Printf("Error parsing image reference: %v\n", err)
         return ""
     }
 
     // Fetch the remote image descriptor
     img, err := remote.Image(ref, remote.WithAuth(auth))
     if err != nil {
-        log.Printf("Error fetching remote image: %v", err)
+        log.Printf("Error fetching remote image: %v\n", err)
         return ""
     }
 
     // Get the image config
     configFile, err := img.ConfigFile()
     if err != nil {
-        log.Printf("Error getting image config: %v", err)
+        log.Printf("Error getting image config: %v\n", err)
         return ""
     }
 
@@ -49,7 +49,7 @@ func containerLabel(repoImage string) string {
 func awsAuth(imageRef string) authn.Authenticator {
     sess, err := session.NewSessionWithOptions(session.Options{ SharedConfigState: session.SharedConfigEnable })
     if err != nil {
-        log.Printf("Failed to create AWS session: %v", err)
+        log.Printf("Failed to create AWS session: %v\n", err)
         return authn.Anonymous
     }
 
@@ -57,7 +57,7 @@ func awsAuth(imageRef string) authn.Authenticator {
     authInput := &ecr.GetAuthorizationTokenInput{}
     authOutput, err := svc.GetAuthorizationToken(authInput)
     if err != nil {
-        log.Printf("Failed to get ECR authorization token: %v", err)
+        log.Printf("Failed to get ECR authorization token: %v\n", err)
         return authn.Anonymous
     }
 
@@ -67,7 +67,7 @@ func awsAuth(imageRef string) authn.Authenticator {
     // Decode base64 token (AWS ECR provides it as `user:password`)
     decodedToken, err := base64.StdEncoding.DecodeString(token)
     if err != nil {
-        log.Printf("Failed to deconde ECR token: %v", err)
+        log.Printf("Failed to deconde ECR token: %v\n", err)
         return authn.Anonymous
     }
 

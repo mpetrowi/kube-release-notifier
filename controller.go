@@ -24,6 +24,7 @@ func (c *DeploymentMonitoringController) updateDeployment(deploy *appsv1.Deploym
     image := deploy.Spec.Template.Spec.Containers[0].Image
     tag := image[strings.LastIndex(image, ":")+1:]
     savedTag := deploy.Annotations["atomicjolt.com/release-notifier-saved-tag"]
+    fmt.Printf("Checking deployment %s/%s, Image: %s, Saved Tag: %s\n", deploy.Namespace, deploy.Name, tag, savedTag)
     if (tag != savedTag) {
         deploymentsClient := c.clientset.AppsV1().Deployments(deploy.ObjectMeta.Namespace)
         retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -60,7 +61,7 @@ func (c *DeploymentMonitoringController) updateDeployment(deploy *appsv1.Deploym
         fmt.Printf("APP UPDATED: %s/%s, Image: %s -> %s\n", deploy.Namespace, name, savedTag, tag)
         message := containerLabel(image)
         fmt.Printf("Tag Message: %s\n", message)
-        notifySlack(name, deploy.Namespace, environment, tag, savedTag, slackmoji, message)
+        //notifySlack(name, deploy.Namespace, environment, tag, savedTag, slackmoji, message)
         //notifyForm(name, deploy.Namespace, environment, tag, message)
     }
 }
@@ -68,7 +69,10 @@ func (c *DeploymentMonitoringController) updateDeployment(deploy *appsv1.Deploym
 func (c *DeploymentMonitoringController) deploymentAdd(obj interface{}) {
     deploy := obj.(*appsv1.Deployment)
     fmt.Printf("MONITORING %s/%s\n", deploy.Namespace, deploy.Name)
-    c.updateDeployment(deploy)
+
+    if (c.deploymentReady(deploy)) {
+        c.updateDeployment(deploy)
+    }
 }
 
 func (c *DeploymentMonitoringController) deploymentUpdate(old, new interface{}) {
@@ -80,9 +84,31 @@ func (c *DeploymentMonitoringController) deploymentUpdate(old, new interface{}) 
     newTag := newImage[strings.LastIndex(newImage, ":")+1:]
     oldTag := oldImage[strings.LastIndex(oldImage, ":")+1:]
 
-    if (newTag != oldTag) {
+    if newTag != oldTag && !c.deploymentReady(newDeploy) {
+        fmt.Printf("Waiting for deployment %s/%s to be ready before notifying\n", newDeploy.Namespace, newDeploy.Name)
+    }
+    
+    if oldDeploy.Annotations["atomicjolt.com/release-notifier-saved-tag"] != newDeploy.Annotations["atomicjolt.com/release-notifier-saved-tag"] {
+        // Already notified
+        return
+    }
+
+    if c.deploymentReady(newDeploy) {
         c.updateDeployment(newDeploy)
     }
+}
+
+func (c *DeploymentMonitoringController) deploymentReady(deploy *appsv1.Deployment) bool {
+    if deploy.Status.ObservedGeneration != deploy.Generation {
+        // Deployment has not yet been observed by the controller
+        return false;
+    }
+    if deploy.Spec.Replicas != nil && deploy.Status.UpdatedReplicas == *deploy.Spec.Replicas && deploy.Status.UnavailableReplicas == 0 {
+        // Deployment is ready
+        return true;
+    }
+    // Waiting for the deployment to be ready
+    return false;
 }
 
 // NewServiceMonitoringController creates a ServiceMonitoringController

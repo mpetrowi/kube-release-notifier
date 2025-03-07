@@ -51,5 +51,5 @@ func notifySlack(name string, namespace string, environment string, tag string, 
         fmt.Printf("%s\n", err)
         return
     }
-    fmt.Printf("Message successfully sent to channel %s at %s", channelID, timestamp)
+    fmt.Printf("Message successfully sent to channel %s at %s\n", channelID, timestamp)
 }
